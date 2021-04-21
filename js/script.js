@@ -1,69 +1,90 @@
-/*eslint-env browser*/
+// HELPER FUNCTION TO GET DOM ELEMENTS
+const $ = (id) => {
+    return document.getElementById(id);
+}
 
-var $ = function (id) {
-    "use strict";
-    return window.document.getElementById(id);
-};
+function getRandomNumber(max) {
+    let random;
+    // CHECK TO BE SURE MAX IS A NUMBER
+    if (!isNaN(max)) {
+        // CREATE RANDOM NUMBER
+        random = Math.random();
+        // RANDOM NUMBER BETWEEN 0 AND 6 (ASSUMING MAX IS 6)
+        random = Math.floor(random * max);
+        // ADD 1 SO RANDOM IS NEVER 0 (1-6)
+        random = random + 1
+    }
+    return random;
+}
 
-var calculateDays = function () {
-    "use strict";
-    var event, dt, year, date, today, oneDay, days;
-    
-    event = $("event").value;
-    dt = $("date").value;
-    
-    //VALIDATE EVENT AND DATE TEXT BOXES
-    if (event.length === 0 || dt.length === 0) {
-        $("message").innerHTML = "Please enter both an event name and a date";
-        return;
+function changePlayer() {
+    // SWITCH TURN BY COMPARING SPAN TAG'S VALUE WITH PLAYER'S NAME
+    if ($('current').innerHTML === $('player1').value) {
+        $('current').innerHTML = $('player2').value;
+    } else {
+        $('current').innerHTML = $('player1').value;
     }
-    
-    //MAKE SURE DATE HAS SLASHES
-    if (dt.indexOf("/") === -1) {
-        $("message").innerHTML = "Please enter date in MM/DD/YYYY format";
-        return;
-    }
-    
-    //MAKE SURE DATE HAS 4-DIGIT YEAR
-    year = dt.substring(dt.length - 4);
-    if (isNaN(year)) {
-        $("message").innerHTML = "Please enter date in MM/DD/YYYY format";
-        return;
-    }
-    
-    //CONVERT DATE STRING TO DATE OBJECT AND MAKE SURE IT'S VALID
-    date = new Date(dt);
-    if (date === "Invalid Date") {
-        $("message").innerHTML = "Please enter date in MM/DD/YYYY format";
-        return;
-    }
-    
-    //CALCULATE DAYS
-    today = new Date();
-    //HOURS * MINUTES * SECONDS * MILLISECONDS
-    oneDay = 24 * 60 * 60 * 1000;
-    //EVENT DATE - TODAY'S DATE
-    days = (date.getTime() - today.getTime()) / oneDay;
-    //ROUND DATE UP
-    days = Math.ceil(days);
-    
-    //CREATE AND DISPLAY MESSAGE
-    //IF EVENT IS OCCURING TODAY
-    if (days === 0) {
-        $("message").innerHTML = "Today is ".concat(event.toLowerCase()) + "! " + date.toDateString();
-    }
-    //IF EVENT OCCURRED IN THE PAST
-    if (days < 0) {
-        $("message").innerHTML = "Event ".concat(event.toLowerCase()) + " happened " + Math.abs(days) + " days in the past!";
-    }
-    //IF EVENT OCCURS IN THE FUTURE
-    if (days > 0) {
-        $("message").innerHTML = Math.abs(days) + " days until ".concat(event.toLowerCase()) + " occurs. " + date.toDateString();
-    }
-};
+    // SET DIE AND TOTAL TEXT BOXES TO 0
+    $('die').value = '0';
+    $('total').value = '0';
+    $('roll').focus();
+}
 
-window.addEventListener("load", function () {
-    "use strict";
-    $("countdown").addEventListener("click", calculateDays);
-    $("event").focus();
+function newGame() {
+    // SET SCORES TO 0
+    $('score1').value = '0';
+    $('score2').value = '0';
+    // CHECK TO SEE IF PLAYER NAMES EXIST
+    if ($('player1').value !== '' || $('player2').value !== '') {
+        $('turn').setAttribute('class', 'open');
+        changePlayer();
+    } else {
+        $('turn').removeAttribute('class');
+        alert('Please enter two player names to begin.');
+    }
+}
+
+function rollDice() {
+    // GET THE TOTAL
+    let total = parseInt($('total').value);
+    // GET RANDOM NUMBER BETWEEN 1-6
+    let die = getRandomNumber(6);
+    // IF DIE IS 1, 0 OUT TOTAL AND SWITCH PLAYER
+    // OTHERWISE INCREMENT USER'S TEMPORARY TOTAL
+    if (die <= 1) {
+        total = 0;
+        changePlayer();
+    } else {
+        total = total + die;
+    }
+    $('die').value = die;
+    $('total').value = total;
+}
+
+function holdTurn() {
+    let total, score;
+    // GET THE TOTAL
+    total = parseInt($('total').value);
+    // GET THE SCORE OF THE CURRENT PLAYER
+    if ($('current').innerHTML === $('player1').value) {
+        score = $('score1');
+    } else {
+        score = $('score2');
+    }
+    // ADD CURRENT SCORE TO TOTAL SCORE
+    score.value = parseInt(score.value) + total;
+    // IF TOTAL SCORE IS 100, PLAYER WINS, START NEW GAME
+    // OTHERWISE CHANGE PLAYER
+    if (score.value >= 100) {
+        alert(`${$('current').innerHTML} wins!`);
+        newGame();
+    } else {
+        changePlayer();
+    }
+}
+
+window.addEventListener('load', () => {
+    $('new_game').addEventListener('click', newGame);
+    $('roll').addEventListener('click', rollDice);
+    $('hold').addEventListener('click', holdTurn);
 });
