@@ -1,90 +1,55 @@
-// HELPER FUNCTION TO GET DOM ELEMENTS
-const $ = (id) => {
-    return document.getElementById(id);
+function getWords(text) {
+    // REMOVE ALL NON ALPHA CHARACTERS
+    text = text.replace(/\./g, '')
+    text = text.replace(/\,/g, '')
+    text = text.replace(/\:/g, '')
+    text = text.toLowerCase()
+
+    // CONVERT TEXT TO AN ARRAY
+    let arrWords = text.split(' ')
+
+    // SORT THE WORDS
+    arrWords.sort()
+
+    // RETURN THE ARRAY
+    return arrWords
 }
 
-function getRandomNumber(max) {
-    let random;
-    // CHECK TO BE SURE MAX IS A NUMBER
-    if (!isNaN(max)) {
-        // CREATE RANDOM NUMBER
-        random = Math.random();
-        // RANDOM NUMBER BETWEEN 0 AND 6 (ASSUMING MAX IS 6)
-        random = Math.floor(random * max);
-        // ADD 1 SO RANDOM IS NEVER 0 (1-6)
-        random = random + 1
+function getUniqueWords(words) {
+    // CREATE AN EMPTY ARRAY TO STORE UNIQUE WORDS
+    let arrUniqueWords = []
+
+    // LOOP THROUGH THE WORDS AND EXTRACT ONLY
+    // THE UNIQUE OCCURENCES OF THOSE WORDS
+    for (let i = 0; i < words.length; i++) {
+        if (words[i] !== words[i - 1]) {
+            arrUniqueWords.push(words[i])
+        }
     }
-    return random;
+
+    // RETURN THE UNIQUE WORDS ARRAY
+    return arrUniqueWords
 }
 
-function changePlayer() {
-    // SWITCH TURN BY COMPARING SPAN TAG'S VALUE WITH PLAYER'S NAME
-    if ($('current').innerHTML === $('player1').value) {
-        $('current').innerHTML = $('player2').value;
-    } else {
-        $('current').innerHTML = $('player1').value;
-    }
-    // SET DIE AND TOTAL TEXT BOXES TO 0
-    $('die').value = '0';
-    $('total').value = '0';
-    $('roll').focus();
-}
+function init() {
+    let text = 'With innovative approaches and advanced methodologies, Vecta Corporation provides scalable business solutions to help companies achieve success through revenue increase, cost management, and user satisfaction. Our approach stems from the three most important business growth aspects: helping companies reach prospects, assist in converting prospects to customers, and assist in retaining those customers. This is accomplished through our interactive solutions and expertise in providing a memorable and positive user experience.'
 
-function newGame() {
-    // SET SCORES TO 0
-    $('score1').value = '0';
-    $('score2').value = '0';
-    // CHECK TO SEE IF PLAYER NAMES EXIST
-    if ($('player1').value !== '' || $('player2').value !== '') {
-        $('turn').setAttribute('class', 'open');
-        changePlayer();
-    } else {
-        $('turn').removeAttribute('class');
-        alert('Please enter two player names to begin.');
+    console.log('Welcome to the Wordlist Application')
+
+    // GET WORDS
+    let words = getWords(text)
+
+    // GET UNIQUE WORDS
+    let uniqueWords = getUniqueWords(words)
+
+    // DISPLAY NUMBER OF WORDS AND UNIQUE WORDS
+    console.log(`Number of words: ${words.length}`)
+    console.log(`Number of unique words: ${uniqueWords.length}`)
+
+    // DISPLAY WORDS AND THEIR COUNTS
+    console.log('Unique word occurences:')
+    for (let word of uniqueWords) {
+        console.log(`${word}\n`)
     }
 }
-
-function rollDice() {
-    // GET THE TOTAL
-    let total = parseInt($('total').value);
-    // GET RANDOM NUMBER BETWEEN 1-6
-    let die = getRandomNumber(6);
-    // IF DIE IS 1, 0 OUT TOTAL AND SWITCH PLAYER
-    // OTHERWISE INCREMENT USER'S TEMPORARY TOTAL
-    if (die <= 1) {
-        total = 0;
-        changePlayer();
-    } else {
-        total = total + die;
-    }
-    $('die').value = die;
-    $('total').value = total;
-}
-
-function holdTurn() {
-    let total, score;
-    // GET THE TOTAL
-    total = parseInt($('total').value);
-    // GET THE SCORE OF THE CURRENT PLAYER
-    if ($('current').innerHTML === $('player1').value) {
-        score = $('score1');
-    } else {
-        score = $('score2');
-    }
-    // ADD CURRENT SCORE TO TOTAL SCORE
-    score.value = parseInt(score.value) + total;
-    // IF TOTAL SCORE IS 100, PLAYER WINS, START NEW GAME
-    // OTHERWISE CHANGE PLAYER
-    if (score.value >= 100) {
-        alert(`${$('current').innerHTML} wins!`);
-        newGame();
-    } else {
-        changePlayer();
-    }
-}
-
-window.addEventListener('load', () => {
-    $('new_game').addEventListener('click', newGame);
-    $('roll').addEventListener('click', rollDice);
-    $('hold').addEventListener('click', holdTurn);
-});
+init()
